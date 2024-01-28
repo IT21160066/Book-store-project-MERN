@@ -3,8 +3,14 @@ const app = express();
 const path = require("path");
 const PORT = process.env.PORT || 3500;
 
+//built-in middleware
 //to find images, css we are using in the server
-app.use("/", express.static(path.join(__dirname, "/public")));
+app.use("/", express.static(path.join(__dirname, "public")));
+
+//ability process json
+//recive and parse json data
+//built-in middleware
+app.use(express.json());
 
 app.use("/", require("./routes/root"));
 
