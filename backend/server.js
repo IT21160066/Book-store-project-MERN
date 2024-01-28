@@ -1,7 +1,18 @@
 const express = require("express");
 const app = express();
 const path = require("path");
+const { logger } = require("./middleware/logger");
+const errorHandler = require("./middleware/errorHandler");
+const cokkieParser = require("cookie-parser");
+const cookieParser = require("cookie-parser");
+const cors = require("cors");
 const PORT = process.env.PORT || 3500;
+
+app.use(logger);
+
+app.use(cors());
+//now API availble to the public
+//other origins can request resources from our API now
 
 //built-in middleware
 //to find images, css we are using in the server
@@ -11,6 +22,9 @@ app.use("/", express.static(path.join(__dirname, "public")));
 //recive and parse json data
 //built-in middleware
 app.use(express.json());
+
+//able to parse cookies that we recive
+app.use(cookieParser());
 
 app.use("/", require("./routes/root"));
 
@@ -24,5 +38,7 @@ app.all("*", (req, res) => {
     res.type("txt").send("404 Not Found");
   }
 });
+
+app.use(errorHandler);
 
 app.listen(PORT, () => console.log(`Server is running on PORT ${PORT}`));
