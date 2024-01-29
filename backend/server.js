@@ -9,7 +9,6 @@ const cors = require("cors");
 const corsOptions = require("./config/corsOptions");
 const connectDB = require("./config/dbConn");
 const mongoose = require("mongoose");
-
 const PORT = process.env.PORT || 3500;
 
 connectDB();
@@ -48,13 +47,26 @@ app.all("*", (req, res) => {
 app.use(errorHandler);
 
 mongoose.connection.once("open", () => {
+  console.log("Connect to MongoDB");
   app.listen(PORT, () => console.log(`Server is running on PORT ${PORT}`));
 });
 
+// mongoose.connection.on("error", (err) => {
+//   console.log(err);
+//   logEvents(
+//     `${err.no}: ${err.code}\t${err.syscall}\t${err.hostname}`,
+//     "mongoErrLog.log"
+//   );
+// });
+
 mongoose.connection.on("error", (err) => {
-  console.log(err);
-  logEvents(
-    `${err.no}: ${err.code}\t${err.syscall}\t${err.hostname}`,
-    "mongoErrLog.log"
-  );
+  console.error("MongoDB connection error:", err);
+
+  // Log error details to a file
+  const errorDetails = {
+    message: err.message,
+    stack: err.stack,
+    // Add more properties as needed
+  };
+  logEvents(JSON.stringify(errorDetails), "mongoErrLog.log");
 });
