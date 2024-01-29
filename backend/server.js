@@ -3,14 +3,14 @@ const app = express();
 const path = require("path");
 const { logger } = require("./middleware/logger");
 const errorHandler = require("./middleware/errorHandler");
-const cokkieParser = require("cookie-parser");
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
+const corsOptions = require("./config/corsOptions");
 const PORT = process.env.PORT || 3500;
 
 app.use(logger);
 
-app.use(cors());
+app.use(cors(corsOptions));
 //now API availble to the public
 //other origins can request resources from our API now
 
