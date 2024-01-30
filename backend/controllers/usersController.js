@@ -53,7 +53,44 @@ const createNewUser = asyncHandler(async (req, res) => {
 // @route PATCH/users
 // @access Private
 
-const updateUser = asyncHandler(async (req, res) => {});
+const updateUser = asyncHandler(async (req, res) => {
+  const { id, username, roles, activeStatus, password } = req.body;
+
+  //confirm data
+  if (
+    !id ||
+    !username ||
+    !Array.isArray(roles) ||
+    typeof activeStatus !== "boolean"
+  ) {
+    return res.status(400).json({ message: "All fields are required" });
+  }
+
+  const user = await User.findById(id).exec();
+
+  if (!user) {
+    return res.status(400).json({ message: "User not found" });
+  }
+
+  //check for duplicate
+  if (duplicate && duplicate?._id.toString() !== id) {
+    return res.status(409).json({ message: "Duplicate username" });
+  }
+
+  user.username = username;
+  user.roles = roles;
+  user.activeStatus = activeStatus;
+
+  if (password) {
+    user.password = await bcrypt.hash(password, 10);
+  }
+
+  //here we need the document
+  //if we call lean on user we don't get save method
+  const updatedUser = await user.save();
+
+  res.json({ message: `${updatedUser.username} updaed` });
+});
 
 // @desc Delete a user
 // @route DELETE/users
