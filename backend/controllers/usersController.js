@@ -20,29 +20,29 @@ const getAllUsers = asyncHandler(async (req, res) => {
 // @access Private
 
 const createNewUser = asyncHandler(async (req, res) => {
-  const { username, password, roles } = req.body;
+  const { userName, password, roles } = req.body;
 
   //confirm data
-  if (!username || !password || !Array.isArray(roles) || !roles.length) {
+  if (!userName || !password || !Array.isArray(roles) || !roles.length) {
     return res.status(400).json({ message: "All fileds are required" });
   }
 
   //check for duplicates
   const duplicate = await User.findOne({ userName }).lean().exec();
   if (duplicate) {
-    return res.status(409).json({ message: "Duplicate username" });
+    return res.status(409).json({ message: "Duplicate UserName" });
   }
 
   //hash password
   const hashedPwd = await bcrypt.hash(password, 10); //salt rounds
-  const userObject = { username, password: hashedPwd, roles };
+  const userObject = { userName, password: hashedPwd, roles };
 
   //create and store new user
   const user = await User.create(userObject);
 
   if (user) {
     //created
-    res.status(201).json({ message: `New user ${username} created]` });
+    res.status(201).json({ message: `New user ${userName} created` });
   } else {
     res.status(400).jsn({ message: "Invalid user data recived" });
   }
@@ -53,13 +53,14 @@ const createNewUser = asyncHandler(async (req, res) => {
 // @access Private
 
 const updateUser = asyncHandler(async (req, res) => {
-  const { id, username, roles, activeStatus, password } = req.body;
+  const { id, userName, roles, activeStatus, password } = req.body;
 
   //confirm data
   if (
     !id ||
-    !username ||
+    !userName ||
     !Array.isArray(roles) ||
+    !roles.length ||
     typeof activeStatus !== "boolean"
   ) {
     return res.status(400).json({ message: "All fields are required" });
@@ -72,11 +73,14 @@ const updateUser = asyncHandler(async (req, res) => {
   }
 
   //check for duplicate
+  const duplicate = await User.findOne({ userName }).lean().exec();
+
+  //allow updatres to the original user
   if (duplicate && duplicate?._id.toString() !== id) {
-    return res.status(409).json({ message: "Duplicate username" });
+    return res.status(409).json({ message: "Duplicate UserName" });
   }
 
-  user.username = username;
+  user.userName = userName;
   user.roles = roles;
   user.activeStatus = activeStatus;
 
@@ -88,7 +92,7 @@ const updateUser = asyncHandler(async (req, res) => {
   //if we call lean on user we don't get save method
   const updatedUser = await user.save();
 
-  res.json({ message: `${updatedUser.username} updaed` });
+  res.json({ message: `${updatedUser.userName} updaed` });
 });
 
 // @desc Delete a user
@@ -104,7 +108,7 @@ const deleteUser = asyncHandler(async (req, res) => {
 
   //we dont want to delte user if they ave notes assigned
   const notes = await Note.findOne({ user: id }).lean().exec();
-  if (notes?.length) {
+  if (notes) {
     return res.status(400).json({ message: "User has assigned notes" });
   }
 
@@ -115,7 +119,7 @@ const deleteUser = asyncHandler(async (req, res) => {
 
   const result = await user.deleteOne();
 
-  const reply = `Username ${result.username} with ID ${result.id} deleted`;
+  const reply = `userName ${result.userName} with ID ${result._id} deleted`;
 
   res.json(reply);
 });
