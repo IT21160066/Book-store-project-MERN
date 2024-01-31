@@ -75,7 +75,7 @@ const updateUser = asyncHandler(async (req, res) => {
   //check for duplicate
   const duplicate = await User.findOne({ userName }).lean().exec();
 
-  //allow updatres to the original user
+  //allow updates to the original user
   if (duplicate && duplicate?._id.toString() !== id) {
     return res.status(409).json({ message: "Duplicate UserName" });
   }
@@ -92,7 +92,7 @@ const updateUser = asyncHandler(async (req, res) => {
   //if we call lean on user we don't get save method
   const updatedUser = await user.save();
 
-  res.json({ message: `${updatedUser.userName} updaed` });
+  res.json({ message: `${updatedUser.userName} updated` });
 });
 
 // @desc Delete a user

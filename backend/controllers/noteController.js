@@ -55,7 +55,37 @@ const createNewNote = asyncHandler(async (req, res) => {
 // @route PATCH/notes
 // @access Private
 
-const updateNote = asyncHandler(async (req, res) => {});
+const updateNote = asyncHandler(async (req, res) => {
+  const { id, user, title, text, completed } = req.body;
+
+  //confirm data
+  if (!id || !user || !title || !text || typeof completed !== "boolean") {
+    return res.status(400).json({ message: "All fileds are required" });
+  }
+
+  //here we need the document
+  //if we call lean on user we don't get save method
+  const note = await Note.findById(id).exec();
+  if (!note) {
+    return res.status(400).json({ message: "Note not found" });
+  }
+
+  //check for duplicate
+  const duplicate = await Note.findOne({ title }).lean().exec();
+
+  //allow updates to original note
+  if (duplicate && duplicate?._id.toString() !== id) {
+    return res.status(409).json({ message: "Duplicate Note title" });
+  }
+
+  note.user = user;
+  note.title = title;
+  note.text = text;
+  note.completed = completed;
+
+  const updatedNote = await note.save();
+  res.json({ message: `${updateNote.title} updated` });
+});
 
 // @desc Delete a note
 // @route DELETE/notes
