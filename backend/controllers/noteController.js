@@ -7,7 +7,7 @@ const asyncHandler = require("express-async-handler");
 // @access Private
 
 const getAllNotes = asyncHandler(async (req, res) => {
-  const notes = await Note.find().select().lean();
+  const notes = await Note.find().lean();
   if (!notes?.length) {
     return res.status(400).json({ message: "No notes found" });
   }
@@ -17,7 +17,9 @@ const getAllNotes = asyncHandler(async (req, res) => {
 // @route POST/notes
 // @access Private
 
-const createNewNote = asyncHandler(async (req, res) => {});
+const createNewNote = asyncHandler(async (req, res) => {
+  const { title, text } = req.body;
+});
 
 // @desc Update a note
 // @route PATCH/notes
