@@ -26,7 +26,29 @@ const getAllNotes = asyncHandler(async (req, res) => {
 // @access Private
 
 const createNewNote = asyncHandler(async (req, res) => {
-  const { title, text } = req.body;
+  const { user, title, text } = req.body;
+
+  //confirm data
+  if (!user || !title || !text) {
+    return res.status(400).json({ message: "All fields are required" });
+  }
+
+  //check for duplicates
+  const duplicate = await Note.findOne({ title }).lean().exec();
+  if (duplicate) {
+    return res.status(409).json({ message: "Duplicate Note title" });
+  }
+
+  const noteObject = { user, title, text };
+
+  //store new user
+  const note = await Note.create(noteObject);
+
+  if (note) {
+    res.status(201).json({ message: `New Note ${title} created` });
+  } else {
+    res.status(400).json({ message: "Invalid Note data recived" });
+  }
 });
 
 // @desc Update a note
