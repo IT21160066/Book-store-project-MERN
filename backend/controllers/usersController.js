@@ -106,7 +106,7 @@ const deleteUser = asyncHandler(async (req, res) => {
     return res.status(400).json({ message: "User ID Required" });
   }
 
-  //we dont want to delte user if they ave notes assigned
+  //we dont want to delte user if they have notes assigned
   const notes = await Note.findOne({ user: id }).lean().exec();
   if (notes) {
     return res.status(400).json({ message: "User has assigned notes" });
